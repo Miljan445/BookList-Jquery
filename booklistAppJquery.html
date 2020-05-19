@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="display-4 text-center">
+          <i class="fas fa-book-open text-primary"></i> My<span class="text-primary">Book</span>List</h1>
+          <form id="book-form">
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text" id="title" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="author">Author</label>
+              <input type="text" id="author" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="isbn">ISBN#</label>
+              <input type="text" id="isbn" class="form-control">
+            </div>
+            <input type="submit" value="Add Book" class="btn btn-primary btn-block">
+          </form>
+          <table class="table table-striped mt-5">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>ISBN#</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="book-list">
+            </tbody>
+          </table>
+      </div>
+    <script>
+        $(document).ready(()=>{
+            class Book {
+                constructor(title,author,isbn){
+                    this.title = title;
+                    this.author = author;
+                    this.isbn = isbn;
+                }
+            }
+            class UI{
+                static addBook(parametar){
+                    $("#title").val("");
+                    $("#author").val("");
+                    $("#isbn").val("");
+                    $("#book-list").append(
+                        `
+                        <tr>
+                        <td>${parametar.title}</td>
+                        <td>${parametar.author}</td>
+                        <td>${parametar.isbn}</td>
+                        <td><button class="btn btn-danger">X</button>
+                        </tr>
+                        `
+                    )
+                }
+                static removeBook(parametar){
+                    parametar.parentElement.parentElement.remove();
+                }
+                static storeBooks(book){
+                    let bookStore = JSON.stringify(book);
+                    console.log(book);
+                    localStorage.setItem(book.isbn,bookStore)
+                }
+                static getBooks(){
+                    let keys = Object.keys(localStorage);
+                    $.each(keys,(index,item)=>{
+                        let format = localStorage.getItem(item);
+                        let forAppend = JSON.parse(format);
+                        UI.addBook(forAppend);
+                    })
+                    
+                }
+                static removeBookFromStorage(parametar){
+                   localStorage.removeItem(parametar)
+                }
+            }
+$(".btn.btn-primary").click((e)=>{
+    e.preventDefault();
+    if($("#title").val() === "" || $("#author").val() === "" || $("#isbn").val() === ""){
+        alert("Please fill out all fields")
+    }else{
+        let newBook = new Book($("#title").val(),$("#author").val(),$("#isbn").val());
+UI.addBook(newBook);
+UI.storeBooks(newBook);
+    }
+
+})
+$("#book-list").click((e)=>{
+    if(e.target.classList.contains("btn-danger")){
+        let forRemoval = e.target;
+        let storeRemoval = e.target.parentElement.previousElementSibling.textContent;
+        UI.removeBookFromStorage(storeRemoval);
+        UI.removeBook(forRemoval);
+    }
+})
+UI.getBooks();
+})
+    </script>
+</body>
+</html>
